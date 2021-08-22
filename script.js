@@ -14,8 +14,8 @@ kaboom({
   // see more at <https://kaboomjs.com/#debug>
 });
 
-loadRoot("../dino/sheets/")
-loadSprite("dino1", "doux.png", {
+loadRoot("../dino/")
+loadSprite("dino1", "sheets/doux.png", {
   sliceX: 24, // Number of cols
   sliceY: 1, // Number of rows
   anims: {
@@ -29,7 +29,7 @@ loadSprite("dino1", "doux.png", {
     }
   }
 })
-loadSprite("dino2", "mort.png", {
+loadSprite("dino2", "sheets/mort.png", {
   sliceX: 24, // Number of cols
   sliceY: 1, // Number of rows
   anims: {
@@ -43,7 +43,7 @@ loadSprite("dino2", "mort.png", {
     }
   }
 })
-loadSprite("dino3", "tard.png", {
+loadSprite("dino3", "sheets/tard.png", {
   sliceX: 24, // Number of cols
   sliceY: 1, // Number of rows
   anims: {
@@ -57,7 +57,7 @@ loadSprite("dino3", "tard.png", {
     }
   }
 })
-loadSprite("dino4", "vita.png", {
+loadSprite("dino4", "sheets/vita.png", {
   sliceX: 24, // Number of cols
   sliceY: 1, // Number of rows
   anims: {
@@ -71,28 +71,92 @@ loadSprite("dino4", "vita.png", {
     }
   }
 })
+loadSprite("grass", "grass.png")
 
+const JUMP_FORCE = 600
+const SPEED = 200
 scene("main", () => {
+const map = addLevel([
+    "                           ",
+    "                           ",
+    "                           ",
+    "                           ",
+    "                           ",
+    "                           ",
+    "           X               ",
+    "         ======            ",
+    "                           ",
+    "                           ",
+    "                   X       ",
+    "                 ======    ",
+    "                           ",
+    "                           ",
+    "                           ",
+    "               X           ",
+    "           ======          ",
+    "                           ",
+    "===========================",
+  ], {
+    width: 24,
+    height: 24,
+    pos: vec2(0, 0),
+    '=': [
+      sprite('grass'),
+      solid()
+    ],
+    'X': [
+      sprite('dino2'),
+      scale(-2, 2),
+      area(vec2(3, 4), vec2(21, 20)),
+      body(),
+      'enemy'
+    ]
+  })
   // Logic
-  const dino1 = add([sprite("dino1"), pos(0, 0), scale(4)])
-  const dino2 = add([sprite("dino2"), pos(100, 0),scale(4)])
-  const dino3 = add([sprite("dino3"), pos(200, 0), scale(4)])
-  const dino4 = add([sprite("dino4"), pos(300, 0), scale(4)])
-
-  dino1.play("main")
-  dino2.play("main")
-  dino3.play("main")
-  dino4.play("main")
-
-  add([rect(220, 30), color(255, 255, 255), origin("center"), pos(200, 160)])
-
-  add([text("Hello World!", 32), pos(200, 115), origin("center")])
-
-  add([
-    text("Here's some smaller text.", 8), pos(200, 160),
-    color(0, 0, 0),
-    origin("center"),
+   
+  const player1 = add([
+    sprite('dino1'),
+    pos(10, 10),
+    scale(2),
+    area(vec2(3, 4), vec2(21, 20)),
+    body(),
+    'player'
   ])
+  
+  collides('player', 'enemy', (p, e) => {
+    go('gameover')
+  })
+
+  keyPress('space', () => {
+    if (player1.grounded())
+    player1.jump(JUMP_FORCE)
+  })
+  
+  keyDown('left', () => {
+    player1.move(-SPEED, 0)
+  })
+  
+  keyDown('right', () => {
+    player1.move(SPEED, 0)
+  })
 })
+
+scene('gameover', () => {
+   add([
+     text("You died!", 32),
+     pos(width() / 2, height() / 2 - 20),
+     origin('center'),
+   ])
+
+   add([
+     text("Press space to start over.", 16),
+     pos(width() / 2, height() / 2 + 20),
+     origin('center'),
+   ])
+
+   keyPress('space', () => {
+     go('main')
+   })
+}) 
 
 start("main")
